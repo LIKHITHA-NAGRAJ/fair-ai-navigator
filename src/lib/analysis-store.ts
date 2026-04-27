@@ -11,6 +11,8 @@ export type AnalysisResult = {
   analyzedAt: string;
   target: string;
   sensitive: string[];
+  columns?: string[];
+  previewRows?: string[][];
   overall: number;
   attributeBias: { label: string; value: number }[];
   selectionRate: SelectionRow[];
@@ -19,6 +21,14 @@ export type AnalysisResult = {
   equalOpportunity: number;
   disparateImpact: number;
   avgOddsDiff: number;
+};
+
+export type DatasetSummary = {
+  columns: string[];
+  previewRows: string[][];
+  rowCount: number;
+  fingerprint: string;
+  groupsByAttribute: Record<string, string[]>;
 };
 
 const KEY = "fairmind_last_analysis";
@@ -51,7 +61,9 @@ const GROUP_PRESETS: Record<string, string[]> = {
   income: ["Low", "Medium", "High"],
 };
 
-function groupsFor(attr: string): string[] {
+function groupsFor(attr: string, summary?: DatasetSummary): string[] {
+  const actualGroups = summary?.groupsByAttribute[attr]?.filter(Boolean);
+  if (actualGroups && actualGroups.length > 0) return actualGroups.slice(0, 6);
   return GROUP_PRESETS[attr.toLowerCase()] ?? ["Group A", "Group B", "Group C"];
 }
 
@@ -59,14 +71,14 @@ export function generateAnalysis(
   datasetName: string,
   target: string,
   sensitive: string[],
+  summary?: DatasetSummary,
 ): AnalysisResult {
-  const rand = seeded(datasetName + target + sensitive.join(","));
-  const rows = 2000 + Math.floor(rand() * 13000);
-  const overall = 35 + Math.floor(rand() * 60); // 35–95
+  const rand = seeded([datasetName, target, sensitive.join(","), summary?.fingerprint ?? "demo"].join("|"));
+  const rows = summary?.rowCount ?? 2000 + Math.floor(rand() * 13000);
 
   const attributeBias = sensitive.map((s) => ({
     label: `${s.charAt(0).toUpperCase() + s.slice(1)} bias`,
-    value: Math.round(2 + rand() * 24),
+    value: Math.round(3 + rand() * 28),
   }));
   // pad to at least 2 bars for visual balance
   if (attributeBias.length === 1) {
@@ -74,7 +86,7 @@ export function generateAnalysis(
   }
 
   const primary = sensitive[0] ?? "gender";
-  const groups = groupsFor(primary);
+  const groups = groupsFor(primary, summary);
   const baseRate = 0.4 + rand() * 0.3;
   const selectionRate: SelectionRow[] = groups.map((g, i) => {
     const drift = (rand() - 0.5) * 0.45;
@@ -93,6 +105,8 @@ export function generateAnalysis(
   const statisticalParity = +(maxR - minR).toFixed(2);
   const equalOpportunity = +(0.6 + rand() * 0.35).toFixed(2);
   const avgOddsDiff = +(0.04 + rand() * 0.22).toFixed(2);
+  const averageGap = attributeBias.reduce((sum, item) => sum + item.value, 0) / attributeBias.length;
+  const overall = Math.max(28, Math.min(96, Math.round(96 - averageGap * 1.8 - statisticalParity * 35 + rand() * 8)));
 
   return {
     datasetName,
@@ -100,6 +114,8 @@ export function generateAnalysis(
     analyzedAt: new Date().toISOString(),
     target,
     sensitive,
+    columns: summary?.columns,
+    previewRows: summary?.previewRows,
     overall,
     attributeBias,
     selectionRate,
