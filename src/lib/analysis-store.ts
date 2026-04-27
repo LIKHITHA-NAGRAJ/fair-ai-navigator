@@ -67,6 +67,61 @@ function groupsFor(attr: string, summary?: DatasetSummary): string[] {
   return GROUP_PRESETS[attr.toLowerCase()] ?? ["Group A", "Group B", "Group C"];
 }
 
+function parseCsvLine(line: string): string[] {
+  const cells: string[] = [];
+  let value = "";
+  let quoted = false;
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
+    const next = line[i + 1];
+    if (char === '"' && quoted && next === '"') {
+      value += '"';
+      i++;
+    } else if (char === '"') {
+      quoted = !quoted;
+    } else if (char === "," && !quoted) {
+      cells.push(value.trim());
+      value = "";
+    } else {
+      value += char;
+    }
+  }
+  cells.push(value.trim());
+  return cells;
+}
+
+function fingerprintText(text: string, file: File) {
+  let hash = `${file.name}:${file.size}:${file.lastModified}`;
+  for (let i = 0; i < text.length; i += Math.max(1, Math.floor(text.length / 400))) {
+    hash += `:${text.charCodeAt(i)}`;
+  }
+  return hash;
+}
+
+export async function summarizeDataset(file: File): Promise<DatasetSummary> {
+  const text = await file.text();
+  const lines = text.split(/\r?\n/).filter((line) => line.trim().length > 0);
+  const parsed = lines.slice(0, 250).map(parseCsvLine).filter((row) => row.length > 1);
+  const columns = parsed[0]?.map((column, index) => column || `column_${index + 1}`) ?? ["age", "gender", "education", "region", "approved"];
+  const bodyRows = parsed.slice(1).filter((row) => row.some(Boolean));
+  const groupsByAttribute = columns.reduce<Record<string, string[]>>((acc, column, index) => {
+    const values = bodyRows
+      .map((row) => row[index])
+      .filter((value) => value && Number.isNaN(Number(value)))
+      .slice(0, 120);
+    acc[column] = Array.from(new Set(values)).slice(0, 6);
+    return acc;
+  }, {});
+
+  return {
+    columns,
+    previewRows: bodyRows.slice(0, 6),
+    rowCount: Math.max(0, lines.length - 1),
+    fingerprint: fingerprintText(text, file),
+    groupsByAttribute,
+  };
+}
+
 export function generateAnalysis(
   datasetName: string,
   target: string,
