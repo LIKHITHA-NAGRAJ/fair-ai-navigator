@@ -13,6 +13,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
 import { Route as DashboardUploadRouteImport } from './routes/dashboard.upload'
+import { Route as DashboardExplainabilityRouteImport } from './routes/dashboard.explainability'
 import { Route as DashboardAnalysisRouteImport } from './routes/dashboard.analysis'
 
 const LoginRoute = LoginRouteImport.update({
@@ -35,6 +36,11 @@ const DashboardUploadRoute = DashboardUploadRouteImport.update({
   path: '/dashboard/upload',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardExplainabilityRoute = DashboardExplainabilityRouteImport.update({
+  id: '/dashboard/explainability',
+  path: '/dashboard/explainability',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardAnalysisRoute = DashboardAnalysisRouteImport.update({
   id: '/dashboard/analysis',
   path: '/dashboard/analysis',
@@ -45,6 +51,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/dashboard/analysis': typeof DashboardAnalysisRoute
+  '/dashboard/explainability': typeof DashboardExplainabilityRoute
   '/dashboard/upload': typeof DashboardUploadRoute
   '/dashboard/': typeof DashboardIndexRoute
 }
@@ -52,6 +59,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/dashboard/analysis': typeof DashboardAnalysisRoute
+  '/dashboard/explainability': typeof DashboardExplainabilityRoute
   '/dashboard/upload': typeof DashboardUploadRoute
   '/dashboard': typeof DashboardIndexRoute
 }
@@ -60,6 +68,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/dashboard/analysis': typeof DashboardAnalysisRoute
+  '/dashboard/explainability': typeof DashboardExplainabilityRoute
   '/dashboard/upload': typeof DashboardUploadRoute
   '/dashboard/': typeof DashboardIndexRoute
 }
@@ -69,6 +78,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/dashboard/analysis'
+    | '/dashboard/explainability'
     | '/dashboard/upload'
     | '/dashboard/'
   fileRoutesByTo: FileRoutesByTo
@@ -76,6 +86,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/dashboard/analysis'
+    | '/dashboard/explainability'
     | '/dashboard/upload'
     | '/dashboard'
   id:
@@ -83,6 +94,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/dashboard/analysis'
+    | '/dashboard/explainability'
     | '/dashboard/upload'
     | '/dashboard/'
   fileRoutesById: FileRoutesById
@@ -91,6 +103,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
   DashboardAnalysisRoute: typeof DashboardAnalysisRoute
+  DashboardExplainabilityRoute: typeof DashboardExplainabilityRoute
   DashboardUploadRoute: typeof DashboardUploadRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
 }
@@ -125,6 +138,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardUploadRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard/explainability': {
+      id: '/dashboard/explainability'
+      path: '/dashboard/explainability'
+      fullPath: '/dashboard/explainability'
+      preLoaderRoute: typeof DashboardExplainabilityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard/analysis': {
       id: '/dashboard/analysis'
       path: '/dashboard/analysis'
@@ -139,6 +159,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
   DashboardAnalysisRoute: DashboardAnalysisRoute,
+  DashboardExplainabilityRoute: DashboardExplainabilityRoute,
   DashboardUploadRoute: DashboardUploadRoute,
   DashboardIndexRoute: DashboardIndexRoute,
 }
