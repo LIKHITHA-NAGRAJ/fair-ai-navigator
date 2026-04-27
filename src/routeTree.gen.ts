@@ -9,14 +9,23 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SignupRouteImport } from './routes/signup'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
 import { Route as DashboardUploadRouteImport } from './routes/dashboard.upload'
+import { Route as DashboardSettingsRouteImport } from './routes/dashboard.settings'
 import { Route as DashboardReportsRouteImport } from './routes/dashboard.reports'
+import { Route as DashboardRecommendationsRouteImport } from './routes/dashboard.recommendations'
 import { Route as DashboardExplainabilityRouteImport } from './routes/dashboard.explainability'
+import { Route as DashboardAssistantRouteImport } from './routes/dashboard.assistant'
 import { Route as DashboardAnalysisRouteImport } from './routes/dashboard.analysis'
 
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -37,14 +46,30 @@ const DashboardUploadRoute = DashboardUploadRouteImport.update({
   path: '/dashboard/upload',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardSettingsRoute = DashboardSettingsRouteImport.update({
+  id: '/dashboard/settings',
+  path: '/dashboard/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardReportsRoute = DashboardReportsRouteImport.update({
   id: '/dashboard/reports',
   path: '/dashboard/reports',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardRecommendationsRoute =
+  DashboardRecommendationsRouteImport.update({
+    id: '/dashboard/recommendations',
+    path: '/dashboard/recommendations',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const DashboardExplainabilityRoute = DashboardExplainabilityRouteImport.update({
   id: '/dashboard/explainability',
   path: '/dashboard/explainability',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardAssistantRoute = DashboardAssistantRouteImport.update({
+  id: '/dashboard/assistant',
+  path: '/dashboard/assistant',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardAnalysisRoute = DashboardAnalysisRouteImport.update({
@@ -56,18 +81,26 @@ const DashboardAnalysisRoute = DashboardAnalysisRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
   '/dashboard/analysis': typeof DashboardAnalysisRoute
+  '/dashboard/assistant': typeof DashboardAssistantRoute
   '/dashboard/explainability': typeof DashboardExplainabilityRoute
+  '/dashboard/recommendations': typeof DashboardRecommendationsRoute
   '/dashboard/reports': typeof DashboardReportsRoute
+  '/dashboard/settings': typeof DashboardSettingsRoute
   '/dashboard/upload': typeof DashboardUploadRoute
   '/dashboard/': typeof DashboardIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
   '/dashboard/analysis': typeof DashboardAnalysisRoute
+  '/dashboard/assistant': typeof DashboardAssistantRoute
   '/dashboard/explainability': typeof DashboardExplainabilityRoute
+  '/dashboard/recommendations': typeof DashboardRecommendationsRoute
   '/dashboard/reports': typeof DashboardReportsRoute
+  '/dashboard/settings': typeof DashboardSettingsRoute
   '/dashboard/upload': typeof DashboardUploadRoute
   '/dashboard': typeof DashboardIndexRoute
 }
@@ -75,9 +108,13 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
   '/dashboard/analysis': typeof DashboardAnalysisRoute
+  '/dashboard/assistant': typeof DashboardAssistantRoute
   '/dashboard/explainability': typeof DashboardExplainabilityRoute
+  '/dashboard/recommendations': typeof DashboardRecommendationsRoute
   '/dashboard/reports': typeof DashboardReportsRoute
+  '/dashboard/settings': typeof DashboardSettingsRoute
   '/dashboard/upload': typeof DashboardUploadRoute
   '/dashboard/': typeof DashboardIndexRoute
 }
@@ -86,27 +123,39 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
+    | '/signup'
     | '/dashboard/analysis'
+    | '/dashboard/assistant'
     | '/dashboard/explainability'
+    | '/dashboard/recommendations'
     | '/dashboard/reports'
+    | '/dashboard/settings'
     | '/dashboard/upload'
     | '/dashboard/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/login'
+    | '/signup'
     | '/dashboard/analysis'
+    | '/dashboard/assistant'
     | '/dashboard/explainability'
+    | '/dashboard/recommendations'
     | '/dashboard/reports'
+    | '/dashboard/settings'
     | '/dashboard/upload'
     | '/dashboard'
   id:
     | '__root__'
     | '/'
     | '/login'
+    | '/signup'
     | '/dashboard/analysis'
+    | '/dashboard/assistant'
     | '/dashboard/explainability'
+    | '/dashboard/recommendations'
     | '/dashboard/reports'
+    | '/dashboard/settings'
     | '/dashboard/upload'
     | '/dashboard/'
   fileRoutesById: FileRoutesById
@@ -114,15 +163,26 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
+  SignupRoute: typeof SignupRoute
   DashboardAnalysisRoute: typeof DashboardAnalysisRoute
+  DashboardAssistantRoute: typeof DashboardAssistantRoute
   DashboardExplainabilityRoute: typeof DashboardExplainabilityRoute
+  DashboardRecommendationsRoute: typeof DashboardRecommendationsRoute
   DashboardReportsRoute: typeof DashboardReportsRoute
+  DashboardSettingsRoute: typeof DashboardSettingsRoute
   DashboardUploadRoute: typeof DashboardUploadRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -151,6 +211,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardUploadRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard/settings': {
+      id: '/dashboard/settings'
+      path: '/dashboard/settings'
+      fullPath: '/dashboard/settings'
+      preLoaderRoute: typeof DashboardSettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard/reports': {
       id: '/dashboard/reports'
       path: '/dashboard/reports'
@@ -158,11 +225,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardReportsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard/recommendations': {
+      id: '/dashboard/recommendations'
+      path: '/dashboard/recommendations'
+      fullPath: '/dashboard/recommendations'
+      preLoaderRoute: typeof DashboardRecommendationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard/explainability': {
       id: '/dashboard/explainability'
       path: '/dashboard/explainability'
       fullPath: '/dashboard/explainability'
       preLoaderRoute: typeof DashboardExplainabilityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/assistant': {
+      id: '/dashboard/assistant'
+      path: '/dashboard/assistant'
+      fullPath: '/dashboard/assistant'
+      preLoaderRoute: typeof DashboardAssistantRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard/analysis': {
@@ -178,9 +259,13 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
+  SignupRoute: SignupRoute,
   DashboardAnalysisRoute: DashboardAnalysisRoute,
+  DashboardAssistantRoute: DashboardAssistantRoute,
   DashboardExplainabilityRoute: DashboardExplainabilityRoute,
+  DashboardRecommendationsRoute: DashboardRecommendationsRoute,
   DashboardReportsRoute: DashboardReportsRoute,
+  DashboardSettingsRoute: DashboardSettingsRoute,
   DashboardUploadRoute: DashboardUploadRoute,
   DashboardIndexRoute: DashboardIndexRoute,
 }
