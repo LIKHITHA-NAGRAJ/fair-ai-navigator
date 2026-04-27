@@ -1,8 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { fairnessMetrics } from "@/lib/mock-data";
+import { loadAnalysis, type AnalysisResult } from "@/lib/analysis-store";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
   RadialBarChart, RadialBar, PolarAngleAxis,
@@ -45,7 +47,37 @@ function MetricCard({ label, value, max = 1, lowerIsBetter = false, fmt = "ratio
 }
 
 function Analysis() {
-  const m = fairnessMetrics;
+  const [result, setResult] = useState<AnalysisResult | null>(null);
+  useEffect(() => {
+    setResult(loadAnalysis());
+  }, []);
+
+  // Adapter — use stored analysis when present, otherwise fall back to demo data.
+  const m = result
+    ? {
+        overall: result.overall,
+        selectionRate: result.selectionRate,
+        errorRates: result.errorRates,
+        statisticalParity: result.statisticalParity,
+        equalOpportunity: result.equalOpportunity,
+        disparateImpact: result.disparateImpact,
+      }
+    : fairnessMetrics;
+
+  const attributeBias = result?.attributeBias ?? [
+    { label: "Gender bias", value: fairnessMetrics.genderBias },
+    { label: "Age bias", value: fairnessMetrics.ageBias },
+    { label: "Region bias", value: 9 },
+    { label: "Education-level bias", value: 6 },
+  ];
+  const avgOdds = result?.avgOddsDiff ?? 0.11;
+
+  const headerName = result?.datasetName ?? "Hiring Q4 2025";
+  const headerRows = result?.rows ?? 12450;
+  const headerDate = result
+    ? new Date(result.analyzedAt).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })
+    : "Apr 22, 2026";
+
   const scoreData = [{ name: "Score", value: m.overall, fill: "oklch(0.55 0.2 250)" }];
 
   return (
@@ -53,9 +85,25 @@ function Analysis() {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
         <div>
           <h1 className="text-3xl font-bold">Bias Analysis</h1>
-          <p className="text-muted-foreground mt-1">Hiring Q4 2025 • 12,450 rows • analyzed Apr 22, 2026</p>
+          <p className="text-muted-foreground mt-1">
+            {headerName} • {headerRows.toLocaleString()} rows • analyzed {headerDate}
+          </p>
+          {result && (
+            <p className="text-xs text-muted-foreground mt-1">
+              Target: <span className="font-medium text-foreground">{result.target}</span> • Sensitive:{" "}
+              <span className="font-medium text-foreground">{result.sensitive.join(", ")}</span>
+            </p>
+          )}
         </div>
-        <TrafficLight score={m.overall} />
+        <div className="flex items-center gap-3">
+          <TrafficLight score={m.overall} />
+          <Link
+            to="/dashboard/upload"
+            className="text-xs text-primary hover:underline"
+          >
+            Run new audit →
+          </Link>
+        </div>
       </div>
 
       {/* Hero score */}
@@ -81,12 +129,7 @@ function Analysis() {
         <Card className="p-6 lg:col-span-2">
           <h3 className="font-semibold mb-4">Bias by sensitive attribute</h3>
           <div className="space-y-5">
-            {[
-              { label: "Gender bias", value: m.genderBias },
-              { label: "Age bias", value: m.ageBias },
-              { label: "Region bias", value: 9 },
-              { label: "Education-level bias", value: 6 },
-            ].map((b) => (
+            {attributeBias.map((b) => (
               <div key={b.label}>
                 <div className="flex items-center justify-between text-sm mb-1.5">
                   <span className="font-medium">{b.label}</span>
@@ -148,7 +191,7 @@ function Analysis() {
           <MetricCard label="Statistical Parity Diff" value={m.statisticalParity} lowerIsBetter />
           <MetricCard label="Equal Opportunity" value={m.equalOpportunity} fmt="percent" />
           <MetricCard label="Disparate Impact" value={m.disparateImpact} fmt="percent" />
-          <MetricCard label="Avg Odds Difference" value={0.11} lowerIsBetter />
+          <MetricCard label="Avg Odds Difference" value={avgOdds} lowerIsBetter />
         </div>
       </div>
     </div>

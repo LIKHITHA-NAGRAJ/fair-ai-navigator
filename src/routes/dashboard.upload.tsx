@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Upload, FileSpreadsheet, Download, CheckCircle2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
+import { generateAnalysis, saveAnalysis } from "@/lib/analysis-store";
 
 export const Route = createFileRoute("/dashboard/upload")({
   component: UploadPage,
@@ -52,10 +53,17 @@ function UploadPage() {
   };
 
   const analyze = () => {
+    if (!file) return;
+    if (sensitive.length === 0) {
+      toast.error("Pick at least one sensitive attribute to audit.");
+      return;
+    }
     setAnalyzing(true);
     setTimeout(() => {
+      const result = generateAnalysis(file.name, target, sensitive);
+      saveAnalysis(result);
       setAnalyzing(false);
-      toast.success("Analysis complete!");
+      toast.success(`Analysis complete — fairness score ${result.overall}/100`);
       navigate({ to: "/dashboard/analysis" });
     }, 2000);
   };
