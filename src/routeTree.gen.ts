@@ -13,6 +13,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
 import { Route as DashboardUploadRouteImport } from './routes/dashboard.upload'
+import { Route as DashboardReportsRouteImport } from './routes/dashboard.reports'
 import { Route as DashboardExplainabilityRouteImport } from './routes/dashboard.explainability'
 import { Route as DashboardAnalysisRouteImport } from './routes/dashboard.analysis'
 
@@ -36,6 +37,11 @@ const DashboardUploadRoute = DashboardUploadRouteImport.update({
   path: '/dashboard/upload',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardReportsRoute = DashboardReportsRouteImport.update({
+  id: '/dashboard/reports',
+  path: '/dashboard/reports',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardExplainabilityRoute = DashboardExplainabilityRouteImport.update({
   id: '/dashboard/explainability',
   path: '/dashboard/explainability',
@@ -52,6 +58,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/dashboard/analysis': typeof DashboardAnalysisRoute
   '/dashboard/explainability': typeof DashboardExplainabilityRoute
+  '/dashboard/reports': typeof DashboardReportsRoute
   '/dashboard/upload': typeof DashboardUploadRoute
   '/dashboard/': typeof DashboardIndexRoute
 }
@@ -60,6 +67,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/dashboard/analysis': typeof DashboardAnalysisRoute
   '/dashboard/explainability': typeof DashboardExplainabilityRoute
+  '/dashboard/reports': typeof DashboardReportsRoute
   '/dashboard/upload': typeof DashboardUploadRoute
   '/dashboard': typeof DashboardIndexRoute
 }
@@ -69,6 +77,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/dashboard/analysis': typeof DashboardAnalysisRoute
   '/dashboard/explainability': typeof DashboardExplainabilityRoute
+  '/dashboard/reports': typeof DashboardReportsRoute
   '/dashboard/upload': typeof DashboardUploadRoute
   '/dashboard/': typeof DashboardIndexRoute
 }
@@ -79,6 +88,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/dashboard/analysis'
     | '/dashboard/explainability'
+    | '/dashboard/reports'
     | '/dashboard/upload'
     | '/dashboard/'
   fileRoutesByTo: FileRoutesByTo
@@ -87,6 +97,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/dashboard/analysis'
     | '/dashboard/explainability'
+    | '/dashboard/reports'
     | '/dashboard/upload'
     | '/dashboard'
   id:
@@ -95,6 +106,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/dashboard/analysis'
     | '/dashboard/explainability'
+    | '/dashboard/reports'
     | '/dashboard/upload'
     | '/dashboard/'
   fileRoutesById: FileRoutesById
@@ -104,6 +116,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   DashboardAnalysisRoute: typeof DashboardAnalysisRoute
   DashboardExplainabilityRoute: typeof DashboardExplainabilityRoute
+  DashboardReportsRoute: typeof DashboardReportsRoute
   DashboardUploadRoute: typeof DashboardUploadRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
 }
@@ -138,6 +151,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardUploadRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard/reports': {
+      id: '/dashboard/reports'
+      path: '/dashboard/reports'
+      fullPath: '/dashboard/reports'
+      preLoaderRoute: typeof DashboardReportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard/explainability': {
       id: '/dashboard/explainability'
       path: '/dashboard/explainability'
@@ -160,6 +180,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   DashboardAnalysisRoute: DashboardAnalysisRoute,
   DashboardExplainabilityRoute: DashboardExplainabilityRoute,
+  DashboardReportsRoute: DashboardReportsRoute,
   DashboardUploadRoute: DashboardUploadRoute,
   DashboardIndexRoute: DashboardIndexRoute,
 }
