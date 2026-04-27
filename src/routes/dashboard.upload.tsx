@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Upload, FileSpreadsheet, Download, CheckCircle2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
-import { generateAnalysis, saveAnalysis } from "@/lib/analysis-store";
+import { generateAnalysis, saveAnalysis, summarizeDataset, type DatasetSummary } from "@/lib/analysis-store";
 
 export const Route = createFileRoute("/dashboard/upload")({
   component: UploadPage,
@@ -31,13 +31,24 @@ function UploadPage() {
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
+  const [datasetSummary, setDatasetSummary] = useState<DatasetSummary | null>(null);
   const [target, setTarget] = useState<string>("approved");
   const [sensitive, setSensitive] = useState<string[]>(["gender", "age"]);
   const [analyzing, setAnalyzing] = useState(false);
   const [dragOver, setDragOver] = useState(false);
 
-  const handleFile = (f: File) => {
+  const columns = datasetSummary?.columns?.length ? datasetSummary.columns : SAMPLE_COLUMNS;
+  const previewRows = datasetSummary?.previewRows?.length ? datasetSummary.previewRows : SAMPLE_ROWS;
+  const rowCount = datasetSummary?.rowCount ?? 12450;
+
+  const handleFile = async (f: File) => {
     setFile(f);
+    const summary = await summarizeDataset(f);
+    setDatasetSummary(summary);
+    const nextTarget = summary.columns.includes("approved") ? "approved" : summary.columns.at(-1) ?? "approved";
+    const inferredSensitive = summary.columns.filter((c) => /gender|age|race|ethnicity|region|education|income/i.test(c) && c !== nextTarget).slice(0, 3);
+    setTarget(nextTarget);
+    setSensitive(inferredSensitive.length ? inferredSensitive : summary.columns.filter((c) => c !== nextTarget).slice(0, 2));
     toast.success(`Loaded ${f.name}`);
   };
 
@@ -45,7 +56,7 @@ function UploadPage() {
     e.preventDefault();
     setDragOver(false);
     const f = e.dataTransfer.files[0];
-    if (f) handleFile(f);
+    if (f) void handleFile(f);
   };
 
   const toggleSensitive = (col: string) => {
@@ -60,7 +71,7 @@ function UploadPage() {
     }
     setAnalyzing(true);
     setTimeout(() => {
-      const result = generateAnalysis(file.name, target, sensitive);
+      const result = generateAnalysis(file.name, target, sensitive, datasetSummary ?? undefined);
       saveAnalysis(result);
       setAnalyzing(false);
       toast.success(`Analysis complete — fairness score ${result.overall}/100`);
@@ -69,8 +80,8 @@ function UploadPage() {
   };
 
   const loadSample = (name: string) => {
-    setFile(new File([""], name, { type: "text/csv" }));
-    toast.success(`Loaded sample: ${name}`);
+    const sampleText = [SAMPLE_COLUMNS.join(","), ...SAMPLE_ROWS.map((row) => row.join(","))].join("\n");
+    void handleFile(new File([sampleText], name, { type: "text/csv" }));
   };
 
   return (
@@ -97,7 +108,7 @@ function UploadPage() {
               type="file"
               accept=".csv,.xlsx,.xls"
               className="hidden"
-              onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
+              onChange={(e) => e.target.files?.[0] && void handleFile(e.target.files[0])}
             />
             <div className="text-center">
               <div className="mx-auto h-16 w-16 rounded-2xl bg-[image:var(--gradient-primary)] flex items-center justify-center shadow-[var(--shadow-glow)]">
@@ -118,15 +129,15 @@ function UploadPage() {
             <Card className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold">Preview (first 6 rows)</h3>
-                <Badge variant="secondary">{SAMPLE_ROWS.length} of 12,450 rows</Badge>
+                <Badge variant="secondary">{previewRows.length} of {rowCount.toLocaleString()} rows</Badge>
               </div>
               <div className="overflow-x-auto rounded-lg border border-border">
                 <table className="w-full text-sm">
                   <thead className="bg-secondary">
-                    <tr>{SAMPLE_COLUMNS.map((c) => <th key={c} className="px-3 py-2 text-left font-medium">{c}</th>)}</tr>
+                    <tr>{columns.map((c) => <th key={c} className="px-3 py-2 text-left font-medium">{c}</th>)}</tr>
                   </thead>
                   <tbody>
-                    {SAMPLE_ROWS.map((r, i) => (
+                    {previewRows.map((r, i) => (
                       <tr key={i} className="border-t border-border">
                         {r.map((v, j) => <td key={j} className="px-3 py-2 text-muted-foreground">{v}</td>)}
                       </tr>
@@ -165,10 +176,13 @@ function UploadPage() {
                 <p className="text-xs text-muted-foreground mb-3">The outcome variable to audit.</p>
                 <select
                   value={target}
-                  onChange={(e) => setTarget(e.target.value)}
+                  onChange={(e) => {
+                    setTarget(e.target.value);
+                    setSensitive((items) => items.filter((item) => item !== e.target.value));
+                  }}
                   className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
                 >
-                  {SAMPLE_COLUMNS.map((c) => <option key={c} value={c}>{c}</option>)}
+                  {columns.map((c) => <option key={c} value={c}>{c}</option>)}
                 </select>
               </Card>
 
@@ -176,7 +190,7 @@ function UploadPage() {
                 <h3 className="font-semibold mb-3">Sensitive attributes</h3>
                 <p className="text-xs text-muted-foreground mb-3">Protected groups to audit for bias.</p>
                 <div className="flex flex-wrap gap-2">
-                  {SAMPLE_COLUMNS.filter((c) => c !== target).map((c) => (
+                  {columns.filter((c) => c !== target).map((c) => (
                     <button
                       key={c}
                       onClick={() => toggleSensitive(c)}
