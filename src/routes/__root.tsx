@@ -33,10 +33,14 @@ export const Route = createRootRoute({
       { title: "FairMind AI — Fair Decisions for Every Human" },
       { name: "description", content: "Detect, measure, and reduce bias in AI systems for hiring, lending, admissions, and more." },
       { property: "og:title", content: "FairMind AI — Fair Decisions for Every Human" },
-      { property: "og:description", content: "Detect bias. Build trust. Deploy fair AI." },
+      { property: "og:description", content: "Detect, measure, and reduce bias in AI systems for hiring, lending, admissions, and more." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "FairMind AI — Fair Decisions for Every Human" },
+      { name: "twitter:description", content: "Detect, measure, and reduce bias in AI systems for hiring, lending, admissions, and more." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/f31a898a-c581-4c7d-a847-4e4c5847afe4/id-preview-b6150365--4b7f20e9-9fa2-4257-b4cc-5dc810dd705c.lovable.app-1777305122023.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/f31a898a-c581-4c7d-a847-4e4c5847afe4/id-preview-b6150365--4b7f20e9-9fa2-4257-b4cc-5dc810dd705c.lovable.app-1777305122023.png" },
     ],
     links: [
       {
