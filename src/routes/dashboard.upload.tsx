@@ -179,7 +179,7 @@ function UploadPage() {
                   onChange={(e) => setTarget(e.target.value)}
                   className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
                 >
-                  {SAMPLE_COLUMNS.map((c) => <option key={c} value={c}>{c}</option>)}
+                  {columns.map((c) => <option key={c} value={c}>{c}</option>)}
                 </select>
               </Card>
 
@@ -187,7 +187,7 @@ function UploadPage() {
                 <h3 className="font-semibold mb-3">Sensitive attributes</h3>
                 <p className="text-xs text-muted-foreground mb-3">Protected groups to audit for bias.</p>
                 <div className="flex flex-wrap gap-2">
-                  {SAMPLE_COLUMNS.filter((c) => c !== target).map((c) => (
+                  {columns.filter((c) => c !== target).map((c) => (
                     <button
                       key={c}
                       onClick={() => toggleSensitive(c)}
