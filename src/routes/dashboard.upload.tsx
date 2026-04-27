@@ -108,7 +108,7 @@ function UploadPage() {
               type="file"
               accept=".csv,.xlsx,.xls"
               className="hidden"
-              onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
+              onChange={(e) => e.target.files?.[0] && void handleFile(e.target.files[0])}
             />
             <div className="text-center">
               <div className="mx-auto h-16 w-16 rounded-2xl bg-[image:var(--gradient-primary)] flex items-center justify-center shadow-[var(--shadow-glow)]">
@@ -176,7 +176,10 @@ function UploadPage() {
                 <p className="text-xs text-muted-foreground mb-3">The outcome variable to audit.</p>
                 <select
                   value={target}
-                  onChange={(e) => setTarget(e.target.value)}
+                  onChange={(e) => {
+                    setTarget(e.target.value);
+                    setSensitive((items) => items.filter((item) => item !== e.target.value));
+                  }}
                   className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
                 >
                   {columns.map((c) => <option key={c} value={c}>{c}</option>)}
