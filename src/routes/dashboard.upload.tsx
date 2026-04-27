@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Upload, FileSpreadsheet, Download, CheckCircle2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
-import { generateAnalysis, saveAnalysis } from "@/lib/analysis-store";
+import { generateAnalysis, saveAnalysis, summarizeDataset, type DatasetSummary } from "@/lib/analysis-store";
 
 export const Route = createFileRoute("/dashboard/upload")({
   component: UploadPage,
@@ -31,13 +31,24 @@ function UploadPage() {
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
+  const [datasetSummary, setDatasetSummary] = useState<DatasetSummary | null>(null);
   const [target, setTarget] = useState<string>("approved");
   const [sensitive, setSensitive] = useState<string[]>(["gender", "age"]);
   const [analyzing, setAnalyzing] = useState(false);
   const [dragOver, setDragOver] = useState(false);
 
-  const handleFile = (f: File) => {
+  const columns = datasetSummary?.columns?.length ? datasetSummary.columns : SAMPLE_COLUMNS;
+  const previewRows = datasetSummary?.previewRows?.length ? datasetSummary.previewRows : SAMPLE_ROWS;
+  const rowCount = datasetSummary?.rowCount ?? 12450;
+
+  const handleFile = async (f: File) => {
     setFile(f);
+    const summary = await summarizeDataset(f);
+    setDatasetSummary(summary);
+    const nextTarget = summary.columns.includes("approved") ? "approved" : summary.columns.at(-1) ?? "approved";
+    const inferredSensitive = summary.columns.filter((c) => /gender|age|race|ethnicity|region|education|income/i.test(c) && c !== nextTarget).slice(0, 3);
+    setTarget(nextTarget);
+    setSensitive(inferredSensitive.length ? inferredSensitive : summary.columns.filter((c) => c !== nextTarget).slice(0, 2));
     toast.success(`Loaded ${f.name}`);
   };
 
@@ -45,7 +56,7 @@ function UploadPage() {
     e.preventDefault();
     setDragOver(false);
     const f = e.dataTransfer.files[0];
-    if (f) handleFile(f);
+    if (f) void handleFile(f);
   };
 
   const toggleSensitive = (col: string) => {
