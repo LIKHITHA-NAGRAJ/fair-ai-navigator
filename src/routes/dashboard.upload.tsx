@@ -71,7 +71,7 @@ function UploadPage() {
     }
     setAnalyzing(true);
     setTimeout(() => {
-      const result = generateAnalysis(file.name, target, sensitive);
+      const result = generateAnalysis(file.name, target, sensitive, datasetSummary ?? undefined);
       saveAnalysis(result);
       setAnalyzing(false);
       toast.success(`Analysis complete — fairness score ${result.overall}/100`);
@@ -80,8 +80,8 @@ function UploadPage() {
   };
 
   const loadSample = (name: string) => {
-    setFile(new File([""], name, { type: "text/csv" }));
-    toast.success(`Loaded sample: ${name}`);
+    const sampleText = [SAMPLE_COLUMNS.join(","), ...SAMPLE_ROWS.map((row) => row.join(","))].join("\n");
+    void handleFile(new File([sampleText], name, { type: "text/csv" }));
   };
 
   return (
@@ -129,15 +129,15 @@ function UploadPage() {
             <Card className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold">Preview (first 6 rows)</h3>
-                <Badge variant="secondary">{SAMPLE_ROWS.length} of 12,450 rows</Badge>
+                <Badge variant="secondary">{previewRows.length} of {rowCount.toLocaleString()} rows</Badge>
               </div>
               <div className="overflow-x-auto rounded-lg border border-border">
                 <table className="w-full text-sm">
                   <thead className="bg-secondary">
-                    <tr>{SAMPLE_COLUMNS.map((c) => <th key={c} className="px-3 py-2 text-left font-medium">{c}</th>)}</tr>
+                    <tr>{columns.map((c) => <th key={c} className="px-3 py-2 text-left font-medium">{c}</th>)}</tr>
                   </thead>
                   <tbody>
-                    {SAMPLE_ROWS.map((r, i) => (
+                    {previewRows.map((r, i) => (
                       <tr key={i} className="border-t border-border">
                         {r.map((v, j) => <td key={j} className="px-3 py-2 text-muted-foreground">{v}</td>)}
                       </tr>
