@@ -1,7 +1,0 @@
-fastapi
-uvicorn
-gunicorn
-google-generativeai
-pandas
-python-multipart
-reportlab
